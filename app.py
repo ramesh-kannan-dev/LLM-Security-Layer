@@ -18,7 +18,7 @@ gemini_chat = gemini_model.start_chat(history=[])
 app = Flask(__name__)
 CORS(app)
 print("⏳ Loading Archias Security Model...")
-model_path = "./archias_model" 
+model_path = "rameshkannan/archias-bert-security"
 try:
     tokenizer = BertTokenizer.from_pretrained(model_path)
     model = BertForSequenceClassification.from_pretrained(model_path)
