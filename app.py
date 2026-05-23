@@ -9,7 +9,7 @@ import urllib.parse
 import os
 
 # --- SETUP GEMINI API ---
-GEMINI_API_KEY = "AIzaSyCi0KomOUg18GNfdoh_Q7sRpmUW4C6GJp8"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 gemini_model = genai.GenerativeModel('gemini-2.5-flash')
 
