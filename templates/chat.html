@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archias - Secure AI Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #131314;
+            --sidebar-bg: #1e1f20;
+            --text-main: #e3e3e3;
+            --text-muted: #c4c7c5;
+            --user-bubble: #2a2b2f;
+            --accent: #00e676;
+            --error: #ff4d4d;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR (History) --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .new-chat-btn {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid #444;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background-color: #333;
+        }
+
+        .history-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 30px;
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item:hover {
+            background-color: #333;
+        }
+
+        /* --- MAIN CHAT AREA --- */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .security-badge {
+            font-size: 12px;
+            background-color: rgba(0, 230, 118, 0.1);
+            color: var(--accent);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            border: 1px solid var(--accent);
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px 15%;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding-bottom: 120px;
+        }
+
+        /* --- MESSAGES --- */
+        .message-row {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background-color: var(--user-bubble);
+            padding: 12px 20px;
+            border-radius: 20px;
+            max-width: 70%;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .ai-msg {
+            align-self: flex-start;
+            max-width: 85%;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        /* Markdown Styling within AI Message */
+        .ai-msg pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .ai-msg code {
+            font-family: monospace;
+            color: #a8c7fa;
+        }
+
+        .ai-msg p {
+            margin-top: 0;
+        }
+
+        /* --- LOADING ANIMATION --- */
+        .loader {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 0;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(0.5);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* --- INPUT AREA --- */
+        .input-wrapper {
+            position: absolute;
+            bottom: 30px;
+            left: 15%;
+            right: 15%;
+            background-color: var(--sidebar-bg);
+            border-radius: 30px;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-wrapper input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 15px;
+            font-size: 15px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .send-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 10px;
+            transition: 0.2s;
+        }
+
+        .send-btn:hover {
+            color: var(--accent);
+        }
+
+        /* --- ERROR OVERLAY --- */
+        .error-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .error-box {
+            background: #2b0000;
+            border: 1px solid var(--error);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <button class="new-chat-btn" onclick="window.location.href='/'">
+            <span class="material-icons">add</span> New Scan
+        </button>
+        <div class="history-title">Recent Verified Prompts</div>
+        <div class="history-list" id="history-list">
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <div>Archias Workspace</div>
+            <div class="security-badge">Layer 3: Gemini Verified</div>
+        </div>
+
+        <div class="chat-container" id="chat-box">
+        </div>
+
+        <div class="input-wrapper">
+            <input type="text" id="chat-input" placeholder="Ask a follow-up question..."
+                onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="processNewMessage()">
+                <span class="material-icons">send</span>
+            </button>
+        </div>
+
+        <div class="error-overlay" id="error-screen">
+            <div class="error-box">
+                <span class="material-icons" style="color: var(--error); font-size: 48px;">gavel</span>
+                <h2 style="color: var(--error);">SECURITY BREACH DETECTED</h2>
+                <p>Archias AI has blocked this request.</p>
+                <p>Redirecting to Firewall...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const historyList = document.getElementById('history-list');
+
+        // 1. Initialize Page from Teleport URL
+        window.onload = () => {
+            loadHistory();
+            const urlParams = new URLSearchParams(window.location.search);
+            const prompt = urlParams.get('prompt');
+
+            if (prompt) {
+                window.history.replaceState({}, document.title, "/chat");
+                appendUserMessage(prompt);
+                saveToHistory(prompt);
+                fetchGemini(prompt);
+            }
+        };
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') processNewMessage();
+        }
+
+        async function processNewMessage() {
+            const inputEl = document.getElementById('chat-input');
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            inputEl.value = '';
+            appendUserMessage(text);
+            saveToHistory(text);
+
+            const loaderId = showLoader();
+
+            // SECURITY FIRST: Send text to Archias Firewall
+            try {
+                let secRes = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                let secData = await secRes.json();
+
+                if (secData.prediction === "MALICIOUS") {
+                    removeLoader(loaderId);
+                    triggerSecurityLockdown();
+                    return;
+                }
+
+                // If safe, ask Gemini
+                fetchGemini(text, loaderId);
+
+            } catch (err) {
+                removeLoader(loaderId);
+                appendBotMessage("System error connecting to Archias Firewall.");
+            }
+        }
+
+        // 3. Ask Gemini with advanced Streaming (Typing Effect)
+        async function fetchGemini(text, existingLoaderId = null) {
+            const loaderId = existingLoaderId || showLoader();
+            const messageElementId = 'msg-' + Date.now();
+
+            try {
+                const response = await fetch('/ask_gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                removeLoader(loaderId);
+
+                // Create the empty message box for the AI to type into
+                chatBox.innerHTML += `<div class="message-row"><div class="ai-msg" id="${messageElementId}"></div></div>`;
+                scrollToBottom();
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullResponse = "";
+
+                // Read the stream chunk by chunk and type it on the screen!
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunkText = decoder.decode(value, { stream: true });
+                    fullResponse += chunkText;
+
+                    document.getElementById(messageElementId).innerHTML = marked.parse(fullResponse);
+                    scrollToBottom();
+                }
+
+            } catch (err) {
+                removeLoader(loaderId);
+                appendBotMessage("⚠️ Connection to AI model failed.");
+            }
+        }
+
+        // --- UI HELPER FUNCTIONS ---
+        function appendUserMessage(text) {
+            chatBox.innerHTML += `<div class="message-row"><div class="user-msg">${text}</div></div>`;
+            scrollToBottom();
+        }
+
+        function appendBotMessage(htmlContent) {
+            chatBox.innerHTML += `<div class="message-row"><div class="ai-msg">${htmlContent}</div></div>`;
+            scrollToBottom();
+        }
+
+        function showLoader() {
+            const id = 'loader-' + Date.now();
+            chatBox.innerHTML += `
+                <div class="message-row" id="${id}">
+                    <div class="loader">
+                        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    </div>
+                </div>`;
+            scrollToBottom();
+            return id;
+        }
+
+        function removeLoader(id) {
+            const loader = document.getElementById(id);
+            if (loader) loader.remove();
+        }
+
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function triggerSecurityLockdown() {
+            document.getElementById('error-screen').style.display = 'flex';
+            setTimeout(() => { window.location.href = '/'; }, 3000);
+        }
+
+        function saveToHistory(text) {
+            let history = JSON.parse(localStorage.getItem('archias_history') || '[]');
+            history.unshift(text);
+            if (history.length > 10) history.pop();
+            localStorage.setItem('archias_history', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            let history = JSON.parse(localStorage.getItem('archias_history') || '[]');
+            historyList.innerHTML = '';
+            history.forEach(item => {
+                historyList.innerHTML += `
+                    <div class="history-item">
+                        <span class="material-icons" style="font-size:16px;">chat_bubble_outline</span>
+                        ${item}
+                    </div>`;
+            });
+        }
+    </script>
+</body>
+
+</html>

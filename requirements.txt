@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+torch --index-url https://download.pytorch.org/whl/cpu
+transformers
+google-generativeai
+datasets

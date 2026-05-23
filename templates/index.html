@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archias: Threat Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #00ff66;
+            --neon-red: #ff3333;
+            --dark-bg: #050b14;
+            --panel-bg: rgba(10, 20, 35, 0.85);
+            --border-glow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            background-image:
+                linear-gradient(rgba(0, 255, 102, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 102, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 850px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 102, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--border-glow);
+            position: relative;
+        }
+
+        /* The Laser Scanning Animation */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+            opacity: 0;
+            z-index: 10;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0;
+                opacity: 1;
+            }
+
+            50% {
+                top: 100%;
+                opacity: 1;
+            }
+
+            100% {
+                top: 0;
+                opacity: 1;
+            }
+        }
+
+        .header {
+            text-align: center;
+            padding: 25px;
+            border-bottom: 1px solid rgba(0, 255, 102, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .header h1 {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-green);
+            margin: 0;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+        }
+
+        .badge {
+            background-color: rgba(0, 255, 102, 0.1);
+            color: var(--neon-green);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            display: inline-block;
+            margin-top: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            border: 1px solid var(--neon-green);
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            max-width: 80%;
+            line-height: 1.5;
+            font-size: 14px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .user-message {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            align-self: flex-end;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 4px solid #3b82f6;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .error-message {
+            background-color: rgba(255, 51, 51, 0.1);
+            color: var(--neon-red);
+            border: 1px solid var(--neon-red);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+            border-left: 4px solid var(--neon-red);
+        }
+
+        .success-message {
+            background-color: rgba(0, 255, 102, 0.1);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+            border-left: 4px solid var(--neon-green);
+        }
+
+        .input-area {
+            display: flex;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(0, 255, 102, 0.2);
+        }
+
+        input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid rgba(0, 255, 102, 0.3);
+            border-radius: 6px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: var(--neon-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.2);
+        }
+
+        input::placeholder {
+            color: #475569;
+        }
+
+        button {
+            background-color: var(--neon-green);
+            color: #000;
+            border: none;
+            padding: 0 25px;
+            margin-left: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #fff;
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="scan-line" id="scanner-laser"></div>
+
+        <div class="header">
+            <h1>Archias Threat Intelligence</h1>
+            <div class="badge">HEURISTIC AI FIREWALL ONLINE</div>
+        </div>
+
+        <div class="chat-box" id="chat-box">
+            <div class="message bot-message success-message">
+                > SYSTEM INITIALIZED.<br>
+                > Awaiting prompt input for semantic threat analysis...
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Inject prompt payload here..."
+                onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Analyze</button>
+        </div>
+    </div>
+
+    <script>
+        function appendMessage(text, className) {
+            const chatBox = document.getElementById('chat-box');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + className;
+            msgDiv.innerHTML = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') sendMessage();
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById('user-input');
+            const userMessage = inputField.value.trim();
+            if (!userMessage) return;
+
+            appendMessage("> " + userMessage, 'user-message');
+            inputField.value = '';
+
+            // Turn on the scanning laser!
+            const laser = document.getElementById('scanner-laser');
+            laser.style.animation = "scan 1.5s infinite linear";
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: userMessage })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Turn off the laser
+                    laser.style.animation = "none";
+                    laser.style.opacity = "0";
+
+                    if (data.prediction === "MALICIOUS") {
+                        appendMessage("⚠️ THREAT DETECTED: " + data.response, 'bot-message error-message');
+                    } else if (data.redirect_url) {
+                        appendMessage("✅ PAYLOAD SECURE. Teleporting to Gemini Workspace...", 'bot-message success-message');
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url;
+                        }, 1200);
+                    }
+                })
+                .catch(error => {
+                    laser.style.animation = "none";
+                    appendMessage("CRITICAL SYSTEM ERROR.", 'bot-message error-message');
+                });
+        }
+    </script>
+</body>
+
+</html>
