@@ -6,6 +6,7 @@ import torch
 from transformers import BertTokenizer, BertForSequenceClassification
 import google.generativeai as genai
 import urllib.parse
+import os
 
 # --- SETUP GEMINI API ---
 GEMINI_API_KEY = "AIzaSyCi0KomOUg18GNfdoh_Q7sRpmUW4C6GJp8"
